@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% for result in data %}
+    <p>
+    {% for elem in result %}
+        <td>{{elem}}</td>
+    {% endfor %}
+    </p>
+{% endfor %}
+{% endblock %}
