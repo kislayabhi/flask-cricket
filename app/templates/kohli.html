@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-{% for result in data %}
-    <p>
-    {% for elem in result %}
-        <td>{{elem}}</td>
-    {% endfor %}
-    </p>
+<table>
+
+<tr>
+{% for each_header in header_data %}
+    <th>{{each_header}}</th>
 {% endfor %}
+</tr>
+
+{% for each_stat in stats_data %}
+    <tr>
+    {% for numbers in each_stat %}
+        <td>{{numbers}}</td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+
+</table>
 {% endblock %}
