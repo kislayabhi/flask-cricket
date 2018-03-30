@@ -1,9 +1,10 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 from app import app
-from app.forms import LoginForm
+from app.forms import LoginForm, SearchPlayerForm
 
 from bs4 import BeautifulSoup
 import requests
+
 
 @app.route('/')
 @app.route('/index')
@@ -24,6 +25,23 @@ def login():
         return redirect(url_for('index'))
     else:
         return render_template('login.html', title='Sign In', form=form)
+
+
+@app.route('/searched_list', methods=['GET', 'POST'])
+def searched_list():
+    flash('search player form submitted by {}'.format(request.form['player_name']))
+    print("we are in request_player")
+    print(request.form['player_name'])
+    matched_players_list = search_a_player(request.form['player_name'])
+    print(matched_players_list)
+    return render_template('searched_list.html', title='found player list', player_list=matched_players_list)
+    # return redirect(url_for('index'))
+
+
+@app.route('/player_search', methods=['GET', 'POST'])
+def request_player():
+    form = SearchPlayerForm()
+    return render_template('player_search.html', title='search players by name', form=form)
 
 
 @app.route('/kohli', methods=['GET', 'POST'])
@@ -59,3 +77,19 @@ def get_player_data(player_url):
 
 def extract_data(data):
     return [ each_data_element.get_text().strip() for each_data_element in data]
+
+
+def search_a_player(player_name):
+    r = requests.get("http://search.espncricinfo.com/ci/content/player/search.html?search=" + player_name)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    players_list = soup.find_all("p", attrs={"class":"ColumnistSmry"})
+    players_name_link = []
+    import re
+    for player in players_list:
+        player_info = player.find("a")
+        print(player_info)
+        name = re.sub(r"[\\n\\t\s]*", "", player_info.contents[0].strip())
+        cricinfo_link = player_info['href']
+        #print('Name: {}, link: {}'.format(name, cricinfo_link))
+        players_name_link.append({"name":name,"cricinfo_link":cricinfo_link})
+    return players_name_link

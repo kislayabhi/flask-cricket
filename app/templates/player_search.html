@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Search a player</h1>
+    <form action="{{ url_for('searched_list') }}" method="post">
+        <p>
+            {{ form.player_name.label }}<br>
+            {{ form.player_name(size=32) }}<br>
+            {% for error in form.player_name.errors %}
+                <span style="color: red;"> [{{ error }}] </span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for player in player_list %}
+    {% set prefix="http://www.espncricinfo.com/" + player.cricinfo_link %}
+    <div><p><a href="{{prefix}}">{{player.name}}</a></p></div>
+    {% endfor %}
+{% endblock %}
