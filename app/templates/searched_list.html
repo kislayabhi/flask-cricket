@@ -3,6 +3,6 @@
 {% block content %}
     {% for player in player_list %}
     {% set prefix="http://www.espncricinfo.com/" + player.cricinfo_link %}
-    <div><p><a href="{{prefix}}">{{player.name}}</a></p></div>
+    <div><p><a href="{{url_for('request_stats', player_country=player.country, player_suffix_link=player.suffix)}}">{{player.name}}</a></p></div>
     {% endfor %}
 {% endblock %}

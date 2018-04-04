@@ -5,13 +5,15 @@ from app.forms import LoginForm, SearchPlayerForm
 from bs4 import BeautifulSoup
 import requests
 
+# always updated rss feed: http://static.cricinfo.com/rss/livescores.xml
 
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'username': 'Abhijeet'}
-    posts = [{'user':'Abhi', 'message':'Advait here is for the world'},
-            {'user':'Mohan', 'message':'Everything is just one and only one'}]
+    user = {'username': 'India'}
+    posts = parse_india_feed()
+    # posts = [{'user':'Abhi', 'message':'Advait here is for the world'},
+    #         {'user':'Mohan', 'message':'Everything is just one and only one'}]
     return render_template('index.html', title='Kislay home', user=user, posts=posts)
 
 
@@ -42,6 +44,14 @@ def searched_list():
 def request_player():
     form = SearchPlayerForm()
     return render_template('player_search.html', title='search players by name', form=form)
+
+
+@app.route('/request_stats/<player_country>/<player_suffix_link>')
+def request_stats(player_country, player_suffix_link):
+    player_url = 'http://www.espncricinfo.com/' + player_country + '/content/player/' + player_suffix_link
+    print("we are in rquest stats")
+    player_data = get_player_data(player_url)
+    return render_template('kohli.html', title='Kohli home', header_data=player_data[0], stats_data=player_data[1:])
 
 
 @app.route('/kohli', methods=['GET', 'POST'])
@@ -79,6 +89,13 @@ def extract_data(data):
     return [ each_data_element.get_text().strip() for each_data_element in data]
 
 
+def parse_india_feed():
+    url = 'http://www.espncricinfo.com/rss/content/story/feeds/6.xml'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'lxml')
+    return [x.get_text() for x in soup.find_all('title')]
+
+
 def search_a_player(player_name):
     r = requests.get("http://search.espncricinfo.com/ci/content/player/search.html?search=" + player_name)
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -90,6 +107,7 @@ def search_a_player(player_name):
         print(player_info)
         name = re.sub(r"[\\n\\t\s]*", "", player_info.contents[0].strip())
         cricinfo_link = player_info['href']
+        split_string = cricinfo_link.split("/")
         #print('Name: {}, link: {}'.format(name, cricinfo_link))
-        players_name_link.append({"name":name,"cricinfo_link":cricinfo_link})
+        players_name_link.append({"name":name,"cricinfo_link":cricinfo_link, "country":split_string[1], "suffix":split_string[-1]})
     return players_name_link
